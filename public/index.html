@@ -3,422 +3,610 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DevPlanet — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>DevPlanet — Seu Código, Seu Cosmos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #060914;
-  --surface:  #0d1525;
-  --violet:   #6e3fc3;
-  --vl:       #9b6ef3;
-  --cyan:     #00d4ff;
-  --cyan-dim: #0099bb;
-  --orange:   #ff6b35;
-  --text:     #c9d1e8;
-  --dim:      #6b7799;
-  --border:   rgba(110,63,195,.22);
-  --border-h: rgba(155,110,243,.5);
+  --void:    #02020a;
+  --deep:    #07060f;
+  --gold:    #c9a84c;
+  --gold-b:  #e8c96a;
+  --gold-d:  #8a6a20;
+  --amber:   #ff9f43;
+  --cream:   #f5e6c8;
+  --star:    #fefefe;
+  --dim:     #7a6a4a;
+  --border:  rgba(201,168,76,.15);
+  --border-h:rgba(201,168,76,.4);
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+html, body { height: 100%; background: var(--void); color: var(--cream); font-family: 'Inter', sans-serif; overflow: hidden; }
 
-/* ── Stars ── */
-#stars { position: fixed; inset: 0; z-index: 0; }
-
-/* ── Nebula glow blobs ── */
-.nebula {
-  position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
-}
-.nebula-1 { width: 600px; height: 600px; background: rgba(110,63,195,.12); top: -200px; right: -150px; }
-.nebula-2 { width: 500px; height: 500px; background: rgba(0,212,255,.07); bottom: -150px; left: -100px; }
-.nebula-3 { width: 400px; height: 400px; background: rgba(255,107,53,.06); top: 40%; left: 30%; }
+/* ── Canvas layers ── */
+#bg-canvas { position: fixed; inset: 0; z-index: 0; }
+#particle-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 
 /* ── Layout ── */
 .page {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 420px;
+}
+@media(max-width:820px){ .page{grid-template-columns:1fr} .left{display:none} }
+
+/* ══════════════════════════════════════
+   LEFT — Hero planet
+══════════════════════════════════════ */
+.left {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 3rem; gap: 2.5rem;
+  position: relative;
 }
 
-@media (max-width: 760px) {
-  .page { grid-template-columns: 1fr; }
-  .left-panel { display: none; }
-}
-
-/* ── Left: animated planet showcase ── */
-.left-panel {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 3rem; gap: 2rem; position: relative; overflow: hidden;
-}
-
-.orbit-system {
-  position: relative; width: 320px; height: 320px; flex-shrink: 0;
-}
-.main-planet {
-  position: absolute; inset: 0; margin: auto;
-  width: 160px; height: 160px;
-}
-.orbit-ring {
-  position: absolute; border-radius: 50%;
-  border: 1px solid rgba(110,63,195,.2);
-  top: 50%; left: 50%; transform: translate(-50%,-50%);
-  animation: orbit-spin var(--speed) linear infinite;
-}
-.orbit-ring::after {
+/* Radial gold glow behind planet */
+.left::before {
   content: '';
   position: absolute;
-  width: var(--dot-size, 8px); height: var(--dot-size, 8px);
-  background: var(--dot-color, var(--cyan));
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(201,168,76,.12) 0%, transparent 70%);
   border-radius: 50%;
-  top: -4px; left: 50%; transform: translateX(-50%);
-  box-shadow: 0 0 8px var(--dot-color, var(--cyan));
+  pointer-events: none;
 }
-.ring-1 { width: 220px; height: 220px; --speed: 8s; --dot-size: 8px; --dot-color: #00d4ff; }
-.ring-2 { width: 290px; height: 290px; --speed: 14s; --dot-size: 6px; --dot-color: #9b6ef3; animation-direction: reverse; }
-.ring-3 { width: 340px; height: 340px; --speed: 22s; --dot-size: 5px; --dot-color: #ff6b35; }
 
-@keyframes orbit-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+.hero-planet-wrap {
+  position: relative;
+  width: 360px; height: 360px;
+  display: flex; align-items: center; justify-content: center;
+}
 
-.planet-canvas-login { border-radius: 50%; animation: float 5s ease-in-out infinite; }
-@keyframes float { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-12px); } }
+/* Orbital rings around hero planet */
+.orbit {
+  position: absolute; border-radius: 50%;
+  border: 1px solid;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.orbit-1 { width: 420px; height: 420px; border-color: rgba(201,168,76,.08); animation: drift 20s linear infinite; }
+.orbit-2 { width: 500px; height: 500px; border-color: rgba(201,168,76,.05); animation: drift 35s linear infinite reverse; }
+.orbit-3 { width: 580px; height: 580px; border-color: rgba(201,168,76,.03); animation: drift 55s linear infinite; }
 
-.showcase-text { text-align: center; }
-.showcase-text h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .5rem; }
-.showcase-text p { font-size: .9rem; color: var(--dim); line-height: 1.6; max-width: 300px; }
+/* Orbital dots */
+.orbit::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--gold-b);
+  box-shadow: 0 0 10px var(--gold-b), 0 0 20px var(--gold);
+  top: 0; left: 50%; transform: translateX(-50%);
+}
+.orbit-1::after { width: 6px; height: 6px; }
+.orbit-2::after { width: 4px; height: 4px; opacity: .7; }
+.orbit-3::after { width: 3px; height: 3px; opacity: .4; }
 
-.level-ticker {
+@keyframes drift { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+#hero-planet {
+  border-radius: 50%;
+  animation: levitate 7s ease-in-out infinite;
+  position: relative; z-index: 2;
+  filter: drop-shadow(0 0 60px rgba(201,168,76,.5)) drop-shadow(0 0 120px rgba(201,168,76,.2));
+}
+@keyframes levitate { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+
+.hero-text { text-align: center; max-width: 380px; }
+
+.eyebrow {
   font-family: 'Space Mono', monospace;
-  font-size: .7rem; letter-spacing: .12em;
-  color: var(--cyan); text-transform: uppercase;
-  background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
-  border-radius: 999px; padding: .3rem .9rem; margin-bottom: .8rem;
-  display: inline-block;
+  font-size: .65rem; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1rem;
+  display: flex; align-items: center; justify-content: center; gap: .6rem;
+}
+.eyebrow::before, .eyebrow::after {
+  content: ''; width: 30px; height: 1px; background: var(--gold-d);
 }
 
-/* ── Right: login panel ── */
-.right-panel {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 300; line-height: 1.1;
+  letter-spacing: -.01em;
+  color: var(--star); margin-bottom: .8rem;
+}
+.hero-title em { font-style: italic; color: var(--gold-b); }
+
+.hero-sub {
+  font-size: .88rem; color: var(--dim); line-height: 1.75;
+  font-weight: 300;
+}
+
+/* Level ticker */
+.ticker-wrap {
+  display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-top: 1.2rem;
+}
+.ticker {
+  font-family: 'Space Mono', monospace; font-size: .65rem;
+  color: var(--gold-d); letter-spacing: .08em;
+  padding: .3rem .7rem;
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 4px;
+  transition: all .4s;
+}
+.ticker.active {
+  color: var(--gold-b);
+  border-color: rgba(201,168,76,.4);
+  background: rgba(201,168,76,.06);
+  box-shadow: 0 0 12px rgba(201,168,76,.1);
+}
+
+/* ══════════════════════════════════════
+   RIGHT — Login panel
+══════════════════════════════════════ */
+.right {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   padding: 2rem;
   border-left: 1px solid var(--border);
+  background: linear-gradient(160deg, rgba(201,168,76,.03) 0%, transparent 60%);
+  position: relative; overflow: hidden;
 }
 
-.login-card {
-  width: 100%; max-width: 400px;
-  background: rgba(13,21,37,.8);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  backdrop-filter: blur(12px);
+/* Top-right corner ornament */
+.right::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle at top right, rgba(201,168,76,.08), transparent 70%);
+  pointer-events: none;
 }
+
+.card {
+  width: 100%; max-width: 360px;
+  position: relative;
+}
+
+/* Gold line top accent */
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.card-inner {
+  background: rgba(7,6,15,.85);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 2.8rem 2.2rem 2.2rem;
+  backdrop-filter: blur(20px);
+  position: relative;
+}
+
+/* Corner marks */
+.card-inner::before, .card-inner::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-color: var(--gold-d);
+  border-style: solid;
+}
+.card-inner::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.card-inner::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
 
 .card-logo {
-  display: flex; align-items: center; gap: .6rem;
-  font-size: 1.1rem; font-weight: 700; margin-bottom: 2.5rem;
-  justify-content: center;
+  text-align: center; margin-bottom: 2.5rem;
 }
-.card-logo .icon { font-size: 1.6rem; }
-.card-logo span { color: var(--cyan); }
+.logo-symbol {
+  font-size: 2rem; display: block; margin-bottom: .5rem;
+  filter: drop-shadow(0 0 12px rgba(201,168,76,.6));
+}
+.logo-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 300; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--cream);
+}
+.logo-name span { color: var(--gold-b); }
 
 .card-title {
-  font-size: 1.6rem; font-weight: 700; letter-spacing: -.03em;
-  margin-bottom: .5rem; text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.7rem; font-weight: 300;
+  line-height: 1.2; margin-bottom: .5rem;
+  color: var(--star);
 }
 .card-sub {
-  font-size: .9rem; color: var(--dim); text-align: center;
-  line-height: 1.6; margin-bottom: 2rem;
+  font-size: .82rem; color: var(--dim); line-height: 1.7;
+  margin-bottom: 2rem; font-weight: 300;
 }
 
-/* ── GitHub button ── */
+/* Error */
+.error-msg {
+  background: rgba(255,100,50,.08);
+  border: 1px solid rgba(255,100,50,.25);
+  color: #ff8060; border-radius: 2px;
+  padding: .7rem 1rem; font-size: .8rem;
+  margin-bottom: 1.2rem; text-align: center;
+  display: none;
+}
+
+/* GitHub button */
 .btn-github {
   width: 100%;
-  display: flex; align-items: center; justify-content: center; gap: .75rem;
-  background: #24292e;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px;
-  padding: .95rem 1.5rem;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: .8rem;
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid var(--border-h);
+  border-radius: 2px;
+  padding: 1rem 1.5rem;
+  font-family: 'Space Mono', monospace;
+  font-size: .8rem; letter-spacing: .06em;
   cursor: pointer; text-decoration: none;
-  transition: background .2s, transform .15s, box-shadow .2s;
   position: relative; overflow: hidden;
+  transition: color .25s, border-color .25s;
 }
 .btn-github::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(110,63,195,.3), rgba(0,212,255,.15));
-  opacity: 0; transition: opacity .2s;
+  background: linear-gradient(135deg, rgba(201,168,76,.12), rgba(201,168,76,.05));
+  opacity: 0; transition: opacity .25s;
 }
-.btn-github:hover { background: #2d3339; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+.btn-github:hover { color: var(--gold-b); border-color: var(--gold); }
 .btn-github:hover::before { opacity: 1; }
-.btn-github:active { transform: translateY(0); }
 
-.gh-icon { width: 22px; height: 22px; fill: currentColor; flex-shrink: 0; }
+/* Gold shimmer on button hover */
+.btn-github::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,.15), transparent);
+  transition: left .5s;
+}
+.btn-github:hover::after { left: 140%; }
 
-/* ── Divider ── */
+.gh-icon { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+
+/* Divider */
 .divider {
   display: flex; align-items: center; gap: .8rem;
-  margin: 1.6rem 0; color: var(--dim); font-size: .8rem;
+  margin: 1.6rem 0; color: var(--dim); font-size: .7rem;
+  font-family: 'Space Mono', monospace; letter-spacing: .1em;
 }
 .divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border));
 }
+.divider::after { background: linear-gradient(90deg, var(--border), transparent); }
 
-/* ── Features list ── */
-.features {
-  list-style: none; display: flex; flex-direction: column; gap: .8rem;
-}
+/* Features */
+.features { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
 .features li {
   display: flex; align-items: flex-start; gap: .7rem;
-  font-size: .85rem; color: var(--dim); line-height: 1.5;
+  font-size: .8rem; color: var(--dim); line-height: 1.5; font-weight: 300;
 }
-.feat-icon {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: rgba(110,63,195,.15); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: .9rem; flex-shrink: 0;
+.feat-mark {
+  font-family: 'Space Mono', monospace; font-size: .65rem;
+  color: var(--gold-d); margin-top: .1rem; flex-shrink: 0;
 }
 
-/* ── Error banner ── */
-.error-banner {
-  background: rgba(255,107,53,.12); border: 1px solid rgba(255,107,53,.3);
-  color: #ff9a6c; border-radius: 10px; padding: .8rem 1rem;
-  font-size: .85rem; margin-bottom: 1.2rem; text-align: center;
-  display: none;
-}
-
-/* ── Footer note ── */
 .card-footer {
-  margin-top: 1.8rem; text-align: center;
-  font-size: .75rem; color: var(--dim); line-height: 1.6;
+  margin-top: 2rem; text-align: center;
+  font-size: .7rem; color: var(--dim); line-height: 1.6;
+  border-top: 1px solid var(--border); padding-top: 1.2rem;
+  font-weight: 300;
 }
-.card-footer a { color: var(--vl); text-decoration: none; }
-
-/* ── Setup notice (shown when env vars missing) ── */
-.setup-notice {
-  background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
-  border-radius: 10px; padding: 1rem; margin-bottom: 1.4rem;
-  font-size: .82rem; line-height: 1.7; color: var(--text);
-}
-.setup-notice code {
-  font-family: 'Space Mono', monospace; font-size: .78rem;
-  background: rgba(0,0,0,.3); padding: .1em .35em; border-radius: 4px;
-  color: var(--cyan);
-}
-.setup-notice summary { cursor: pointer; font-weight: 600; color: var(--cyan); margin-bottom: .5rem; }
+.card-footer a { color: var(--gold-d); text-decoration: none; transition: color .2s; }
+.card-footer a:hover { color: var(--gold); }
 </style>
 </head>
 <body>
 
-<canvas id="stars"></canvas>
-<div class="nebula nebula-1"></div>
-<div class="nebula nebula-2"></div>
-<div class="nebula nebula-3"></div>
+<canvas id="bg-canvas"></canvas>
+<canvas id="particle-canvas"></canvas>
 
 <div class="page">
-  <!-- Left: planet showcase -->
-  <div class="left-panel">
-    <div class="orbit-system">
-      <div class="orbit-ring ring-1"></div>
-      <div class="orbit-ring ring-2"></div>
-      <div class="orbit-ring ring-3"></div>
-      <div class="main-planet">
-        <canvas class="planet-canvas-login" id="planet-canvas" width="160" height="160"></canvas>
-      </div>
+  <!-- LEFT -->
+  <div class="left">
+    <div class="hero-planet-wrap">
+      <div class="orbit orbit-1"></div>
+      <div class="orbit orbit-2"></div>
+      <div class="orbit orbit-3"></div>
+      <canvas id="hero-planet" width="280" height="280"></canvas>
     </div>
-    <div class="showcase-text">
-      <div class="level-ticker" id="level-ticker">🪐 Nível 5 · Planeta Oceânico</div>
-      <h2>Qual planeta é o seu?</h2>
-      <p>Seu histórico no GitHub vira um mundo único. Quanto mais você contribui, mais grandioso ele fica.</p>
+
+    <div class="hero-text">
+      <div class="eyebrow">Cosmos do Código</div>
+      <h1 class="hero-title">Seu GitHub<br>é um <em>planeta vivo</em></h1>
+      <p class="hero-sub">Cada commit molda a superfície. Cada estrela ilumina a atmosfera. Cada repositório expande o continente.</p>
+      <div class="ticker-wrap" id="ticker-wrap"></div>
     </div>
   </div>
 
-  <!-- Right: login -->
-  <div class="right-panel">
-    <div class="login-card">
-      <div class="card-logo">
-        <span class="icon">🪐</span>
-        Dev<span>Planet</span>
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-logo">
+          <span class="logo-symbol">✦</span>
+          <div class="logo-name">Dev<span>Planet</span></div>
+        </div>
+
+        <div class="error-msg" id="error-msg"></div>
+
+        <div class="card-title">Entre no cosmos</div>
+        <p class="card-sub">Conecte sua conta GitHub e veja qual mundo o seu histórico de dev revelou.</p>
+
+        <a href="/auth/github" class="btn-github">
+          <svg class="gh-icon" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          Entrar com GitHub
+        </a>
+
+        <div class="divider">o que te espera</div>
+
+        <ul class="features">
+          <li><span class="feat-mark">✦</span><span>Planeta único gerado pelo DNA do seu GitHub — nunca dois iguais</span></li>
+          <li><span class="feat-mark">✦</span><span>Superfície, atmosfera e anéis evoluem com suas contribuições</span></li>
+          <li><span class="feat-mark">✦</span><span>Placar galáctico entre os devs mais ativos do universo</span></li>
+          <li><span class="feat-mark">✦</span><span>Acesso apenas leitura — jamais escrevemos no seu GitHub</span></li>
+        </ul>
+
+        <p class="card-footer">
+          Dados via <a href="https://docs.github.com/en/rest" target="_blank">GitHub REST API</a> · <a href="#">Privacidade</a>
+        </p>
       </div>
-
-      <div class="error-banner" id="error-banner"></div>
-
-      <div class="card-title">Bem-vindo ao cosmos</div>
-      <p class="card-sub">Entre com sua conta do GitHub para revelar o planeta gerado pelo seu perfil de dev.</p>
-
-      <div id="setup-notice" style="display:none">
-        <details class="setup-notice" open>
-          <summary>⚙️ Configuração necessária</summary>
-          Para ativar o login real, crie um <strong>GitHub OAuth App</strong> em
-          <a href="https://github.com/settings/developers" target="_blank" style="color:var(--cyan)">github.com/settings/developers</a>
-          e adicione ao arquivo <code>.env</code>:<br><br>
-          <code>GITHUB_CLIENT_ID=seu_client_id</code><br>
-          <code>GITHUB_CLIENT_SECRET=seu_secret</code><br>
-          <code>GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback</code><br>
-          <code>SESSION_SECRET=qualquer_string_aleatoria</code>
-        </details>
-      </div>
-
-      <a href="/auth/github" class="btn-github" id="login-btn">
-        <svg class="gh-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-        </svg>
-        Entrar com GitHub
-      </a>
-
-      <div class="divider">o que você ganha</div>
-
-      <ul class="features">
-        <li>
-          <div class="feat-icon">🪐</div>
-          <span>Planeta único gerado pelo seu histórico real de contribuições</span>
-        </li>
-        <li>
-          <div class="feat-icon">📊</div>
-          <span>Score calculado com estrelas, forks, repos, seguidores e linguagens</span>
-        </li>
-        <li>
-          <div class="feat-icon">🏆</div>
-          <span>Placar global com os devs mais ativos do universo</span>
-        </li>
-        <li>
-          <div class="feat-icon">🔒</div>
-          <span>Apenas leitura — nunca escrevemos nada no seu GitHub</span>
-        </li>
-      </ul>
-
-      <p class="card-footer">
-        Ao entrar, você concorda com nossa <a href="#">política de privacidade</a>.<br>
-        Dados lidos via <a href="https://docs.github.com/en/rest" target="_blank">GitHub REST API</a>.
-      </p>
     </div>
   </div>
 </div>
 
 <script>
-/* ── Stars ── */
-(function() {
-  const c = document.getElementById('stars'), ctx = c.getContext('2d');
-  let stars = [];
-  function resize() {
-    c.width = window.innerWidth; c.height = window.innerHeight;
-    stars = Array.from({length: Math.floor(c.width*c.height/4000)}, () => ({
+/* ══════════════════════════
+   NEBULA BACKGROUND
+══════════════════════════ */
+(function(){
+  const c = document.getElementById('bg-canvas');
+  const ctx = c.getContext('2d');
+
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  // Static nebula blobs
+  function drawNebula(){
+    ctx.clearRect(0,0,c.width,c.height);
+
+    // Deep space gradient
+    const bg = ctx.createRadialGradient(c.width*.5, c.height*.5, 0, c.width*.5, c.height*.5, c.width);
+    bg.addColorStop(0, '#07060f');
+    bg.addColorStop(1, '#02020a');
+    ctx.fillStyle = bg; ctx.fillRect(0,0,c.width,c.height);
+
+    // Gold nebula clouds
+    const blobs = [
+      {x:.15,y:.2,r:.35,c:'rgba(201,168,76,.04)'},
+      {x:.75,y:.7,r:.4,c:'rgba(201,168,76,.03)'},
+      {x:.5,y:.5,r:.6,c:'rgba(140,80,20,.03)'},
+      {x:.85,y:.15,r:.25,c:'rgba(255,159,67,.03)'},
+      {x:.1,y:.8,r:.3,c:'rgba(201,168,76,.025)'},
+    ];
+    blobs.forEach(b=>{
+      const g = ctx.createRadialGradient(c.width*b.x, c.height*b.y, 0, c.width*b.x, c.height*b.y, c.width*b.r);
+      g.addColorStop(0, b.c); g.addColorStop(1, 'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,c.width,c.height);
+    });
+
+    // Stars
+    const seed = 42;
+    function rng(n){ let x=Math.sin(n+seed)*10000; return x-Math.floor(x); }
+    const nStars = Math.floor(c.width*c.height/2200);
+    for(let i=0;i<nStars;i++){
+      const x=rng(i*3)*c.width, y=rng(i*3+1)*c.height;
+      const r=rng(i*3+2)*1.5+.2;
+      const gold = rng(i*7) > .93; // 7% gold stars
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle = gold ? `rgba(201,168,76,${rng(i*.4)*.6+.2})` : `rgba(245,230,200,${rng(i*.4)*.5+.1})`;
+      ctx.fill();
+      if(gold && r > 1.2){
+        const g2=ctx.createRadialGradient(x,y,0,x,y,r*4);
+        g2.addColorStop(0,'rgba(201,168,76,.15)'); g2.addColorStop(1,'transparent');
+        ctx.fillStyle=g2; ctx.fill();
+      }
+    }
+  }
+  drawNebula();
+  window.addEventListener('resize',()=>{ resize(); drawNebula(); });
+})();
+
+/* ══════════════════════════
+   FLOATING GOLD PARTICLES
+══════════════════════════ */
+(function(){
+  const c = document.getElementById('particle-canvas');
+  const ctx = c.getContext('2d');
+  let pts = [];
+
+  function resize(){ c.width=window.innerWidth; c.height=window.innerHeight; init(); }
+
+  function init(){
+    pts = Array.from({length:55},()=>({
       x: Math.random()*c.width, y: Math.random()*c.height,
-      r: Math.random()*1.3+.2, a: Math.random()*.7+.1,
-      sp: Math.random()*.5+.1, ph: Math.random()*Math.PI*2
+      vx: (Math.random()-.5)*.18, vy: (Math.random()-.5)*.18,
+      r: Math.random()*1.8+.3,
+      a: Math.random()*.45+.05,
+      gold: Math.random()>.6,
+      phase: Math.random()*Math.PI*2,
+      speed: Math.random()*.6+.2,
     }));
   }
+
   let t=0;
-  function draw() {
-    ctx.clearRect(0,0,c.width,c.height); t+=.007;
-    stars.forEach(s => {
-      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,210,255,${s.a*(0.6+0.4*Math.sin(t*s.sp+s.ph))})`;
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height); t+=.008;
+    for(const p of pts){
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<-10) p.x=c.width+10;
+      if(p.x>c.width+10) p.x=-10;
+      if(p.y<-10) p.y=c.height+10;
+      if(p.y>c.height+10) p.y=-10;
+      const pulse = p.a*(0.5+0.5*Math.sin(t*p.speed+p.phase));
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.gold ? `rgba(201,168,76,${pulse})` : `rgba(245,230,200,${pulse*.5})`;
       ctx.fill();
-    });
+    }
     requestAnimationFrame(draw);
   }
   resize(); draw();
   window.addEventListener('resize', resize);
 })();
 
-/* ── Demo planet (Oceânico level) ── */
-(function() {
-  const canvas = document.getElementById('planet-canvas');
+/* ══════════════════════════
+   HERO PLANET (rotating luxury)
+══════════════════════════ */
+(function(){
+  const canvas = document.getElementById('hero-planet');
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height, R = W * 0.42;
-  const cx = W/2, cy = H/2;
-  let angle = 0;
+  const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, R=W*.41;
 
-  function rng(seed) {
-    let s = seed >>> 0;
-    return function() {
-      s |= 0; s = s + 0x6D2B79F5 | 0;
-      let t = Math.imul(s ^ s>>>15, 1|s);
-      t = t + Math.imul(t^t>>>7, 61|t)^t;
-      return ((t^t>>>14)>>>0)/4294967296;
-    };
+  function rng(seed){
+    let s=seed>>>0;
+    return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
   }
+  const r1=rng(0xDEAD);
 
-  function draw(t) {
+  let rot=0;
+  function draw(){
     ctx.clearRect(0,0,W,H);
+
+    // Save for ring behind
+    ctx.save();
+
+    // Rings behind planet
+    ctx.save();
+    ctx.translate(cx,cy); ctx.scale(1,.28);
+    for(let i=3;i>=0;i--){
+      const inn=R*(1.28+i*.2), out=inn+R*.1;
+      const alpha=[.55,.42,.3,.18][i];
+      const g=ctx.createLinearGradient(-out,0,out,0);
+      const c1=`rgba(201,168,76,${alpha+.1})`, c2=`rgba(138,106,32,${alpha})`;
+      g.addColorStop(0,c2); g.addColorStop(.35,c1); g.addColorStop(.65,c1); g.addColorStop(1,c2);
+      ctx.strokeStyle=g; ctx.lineWidth=out-inn;
+      ctx.beginPath(); ctx.arc(0,0,(inn+out)/2,0,Math.PI*2); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Clip to sphere
     ctx.save();
     ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
 
-    // base
-    const g = ctx.createRadialGradient(cx-R*.25,cy-R*.25,R*.1,cx,cy,R);
-    g.addColorStop(0,'#5ba8ff'); g.addColorStop(.5,'#2563a8'); g.addColorStop(1,'#0a2a5c');
-    ctx.fillStyle=g; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+    // Base — deep amber-gold
+    const base=ctx.createRadialGradient(cx-R*.2,cy-R*.2,R*.05,cx,cy,R);
+    base.addColorStop(0,'#6b4a1a');
+    base.addColorStop(.4,'#3d2a0c');
+    base.addColorStop(1,'#1a0f04');
+    ctx.fillStyle=base; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
 
-    // continents (animated subtle rotation)
-    const r2 = rng(42);
-    for(let i=0;i<4;i++){
-      const a = r2()*Math.PI*2 + t*0.003;
-      const d = r2()*R*.5;
-      const x=cx+Math.cos(a)*d, y=cy+Math.sin(a)*d*.7;
-      const sz=R*(0.18+r2()*.22);
-      const gr=ctx.createRadialGradient(x,y,0,x,y,sz);
-      gr.addColorStop(0,'rgba(45,138,78,.75)'); gr.addColorStop(.6,'rgba(45,138,78,.4)'); gr.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=gr; ctx.beginPath();
-      const pts=7; for(let j=0;j<=pts;j++){const ang=(j/pts)*Math.PI*2;const rad=sz*(0.7+r2()*.6);const px=x+Math.cos(ang)*rad,py=y+Math.sin(ang)*rad*.75;j===0?ctx.moveTo(px,py):ctx.lineTo(px,py);} ctx.closePath(); ctx.fill();
-    }
+    // Band system (rotates)
+    const bands=[
+      {y:-.6,h:.18,c:'rgba(180,120,40,.35)'},
+      {y:-.35,h:.12,c:'rgba(100,65,15,.4)'},
+      {y:-.1,h:.22,c:'rgba(201,150,50,.22)'},
+      {y:.2,h:.1, c:'rgba(80,50,10,.45)'},
+      {y:.38,h:.2, c:'rgba(160,100,30,.3)'},
+      {y:.65,h:.12,c:'rgba(120,75,20,.35)'},
+    ];
+    bands.forEach(b=>{
+      const ry=cy+b.y*R;
+      ctx.fillStyle=b.c;
+      ctx.fillRect(cx-R,ry,R*2,b.h*R);
+    });
 
-    // clouds
-    const r3=rng(77);
+    // Storm swirl (unique feature)
+    ctx.save();
+    ctx.translate(cx+R*.25+Math.sin(rot*.3)*R*.08, cy-R*.1);
+    const storm=ctx.createRadialGradient(0,0,0,0,0,R*.18);
+    storm.addColorStop(0,'rgba(255,180,60,.5)');
+    storm.addColorStop(.5,'rgba(200,130,40,.2)');
+    storm.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=storm;
+    ctx.rotate(rot);
+    ctx.scale(1,.6);
+    ctx.beginPath(); ctx.arc(0,0,R*.18,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    // Surface craters
+    const cr=rng(0xBEEF);
     for(let i=0;i<12;i++){
-      const a=r3()*Math.PI*2+t*0.005*(i%2?1:-1);
-      const d=r3()*R*.72; const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d*.65;
-      const sz=R*(0.08+r3()*.1);
-      const gc=ctx.createRadialGradient(x,y,0,x,y,sz);
-      gc.addColorStop(0,'rgba(255,255,255,.42)'); gc.addColorStop(.5,'rgba(255,255,255,.12)'); gc.addColorStop(1,'rgba(255,255,255,0)');
-      ctx.fillStyle=gc; ctx.beginPath(); ctx.ellipse(x,y,sz,sz*.5,r3()*Math.PI,0,Math.PI*2); ctx.fill();
+      const a=cr()*Math.PI*2, d=cr()*R*.75;
+      const x=cx+Math.cos(a+rot*.1)*d, y=cy+Math.sin(a+rot*.1)*d*.9;
+      const sz=R*(cr()*.06+.02);
+      const cg=ctx.createRadialGradient(x-sz*.3,y-sz*.3,0,x,y,sz);
+      cg.addColorStop(0,'rgba(0,0,0,.6)');
+      cg.addColorStop(.7,'rgba(0,0,0,.2)');
+      cg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=cg;
+      ctx.beginPath(); ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
     }
 
-    // specular
-    const sp=ctx.createRadialGradient(cx-R*.3,cy-R*.35,0,cx-R*.1,cy-R*.1,R*.7);
-    sp.addColorStop(0,'rgba(255,255,255,.2)'); sp.addColorStop(.4,'rgba(255,255,255,.05)'); sp.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=sp; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+    // Specular highlight
+    const spec=ctx.createRadialGradient(cx-R*.32,cy-R*.38,0,cx-R*.1,cy-R*.15,R*.75);
+    spec.addColorStop(0,'rgba(255,220,140,.3)');
+    spec.addColorStop(.4,'rgba(255,200,100,.08)');
+    spec.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=spec; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
 
-    // shadow
-    const sh=ctx.createRadialGradient(cx+R*.55,cy+R*.1,0,cx+R*.3,cy,R*1.1);
-    sh.addColorStop(0,'rgba(0,0,0,.7)'); sh.addColorStop(.55,'rgba(0,0,0,.3)'); sh.addColorStop(1,'rgba(0,0,0,0)');
+    // Terminator shadow
+    const sh=ctx.createRadialGradient(cx+R*.6,cy+R*.1,0,cx+R*.25,cy,R*1.05);
+    sh.addColorStop(0,'rgba(0,0,0,.85)');
+    sh.addColorStop(.5,'rgba(0,0,0,.35)');
+    sh.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=sh; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
     ctx.restore();
 
-    // atmosphere
-    const atm=ctx.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.18);
-    atm.addColorStop(0,'rgba(77,163,255,.28)'); atm.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=atm; ctx.beginPath(); ctx.arc(cx,cy,R*1.18,0,Math.PI*2); ctx.fill();
+    // Atmosphere glow
+    const atm=ctx.createRadialGradient(cx,cy,R*.88,cx,cy,R*1.2);
+    atm.addColorStop(0,'rgba(201,168,76,.22)');
+    atm.addColorStop(.6,'rgba(180,120,40,.08)');
+    atm.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=atm; ctx.beginPath(); ctx.arc(cx,cy,R*1.2,0,Math.PI*2); ctx.fill();
 
-    canvas.style.filter='drop-shadow(0 0 22px #2563a8aa)';
-    angle += .005;
-    requestAnimationFrame(()=>draw(angle));
+    // Rings in front (bottom half only)
+    ctx.save();
+    ctx.translate(cx,cy); ctx.scale(1,.28);
+    ctx.beginPath(); ctx.rect(-R*2.5,0,R*5,R*3); ctx.clip();
+    for(let i=3;i>=0;i--){
+      const inn=R*(1.28+i*.2), out=inn+R*.1;
+      const alpha=[.75,.6,.45,.28][i];
+      ctx.strokeStyle=`rgba(201,168,76,${alpha})`;
+      ctx.lineWidth=out-inn;
+      ctx.beginPath(); ctx.arc(0,0,(inn+out)/2,0,Math.PI*2); ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.restore();
+    rot+=.003;
+    requestAnimationFrame(draw);
   }
-  draw(0);
+  draw();
 })();
 
-/* ── Check for error param ── */
-const params = new URLSearchParams(location.search);
-if (params.get('error')) {
-  const b = document.getElementById('error-banner');
-  b.textContent = 'Falha na autenticação com o GitHub. Tente novamente.';
-  b.style.display = 'block';
-}
+/* ══════════════════════════
+   LEVEL TICKER
+══════════════════════════ */
+(function(){
+  const levels=['🪨 Asteroide','🌑 Proto-planeta','🌍 Terrestre','🌿 Mundo Verde','🌊 Oceânico','🌟 Gigante Gasoso','🧊 Gigante de Gelo','🌌 Nebulosa','☀️ Estrela Dev'];
+  const wrap=document.getElementById('ticker-wrap');
+  wrap.innerHTML=levels.map((l,i)=>`<span class="ticker${i===4?' active':''}" id="tk${i}">${l}</span>`).join('');
+  let cur=4;
+  setInterval(()=>{
+    document.getElementById('tk'+cur)?.classList.remove('active');
+    cur=(cur+1)%levels.length;
+    document.getElementById('tk'+cur)?.classList.add('active');
+  },1800);
+})();
 
-/* ── Check if server is configured ── */
-fetch('/api/me').then(r => {
-  if (r.status === 503) document.getElementById('setup-notice').style.display = 'block';
-}).catch(() => {});
-
-/* ── Level ticker cycle ── */
-const levels = ['🪨 Nível 1 · Asteroide','🌑 Nível 2 · Proto-planeta','🌍 Nível 3 · Planeta Terrestre','🌿 Nível 4 · Mundo Verde','🌊 Nível 5 · Planeta Oceânico','🌟 Nível 6 · Gigante Gasoso','🧊 Nível 7 · Gigante de Gelo','🌌 Nível 8 · Planeta Nebulosa','☀️ Nível 9 · Estrela Dev'];
-let li = 4;
-const ticker = document.getElementById('level-ticker');
-setInterval(() => { li = (li+1)%levels.length; ticker.style.opacity=0; setTimeout(()=>{ticker.textContent=levels[li];ticker.style.opacity=1;},300); }, 2500);
-ticker.style.transition='opacity .3s';
+// Error
+const p=new URLSearchParams(location.search);
+if(p.get('error')){const e=document.getElementById('error-msg');e.textContent='Falha na autenticação. Tente novamente.';e.style.display='block';}
 </script>
 </body>
 </html>
