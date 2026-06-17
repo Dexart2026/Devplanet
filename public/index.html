@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevPlanet — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #060914;
+  --surface:  #0d1525;
+  --violet:   #6e3fc3;
+  --vl:       #9b6ef3;
+  --cyan:     #00d4ff;
+  --cyan-dim: #0099bb;
+  --orange:   #ff6b35;
+  --text:     #c9d1e8;
+  --dim:      #6b7799;
+  --border:   rgba(110,63,195,.22);
+  --border-h: rgba(155,110,243,.5);
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+
+/* ── Stars ── */
+#stars { position: fixed; inset: 0; z-index: 0; }
+
+/* ── Nebula glow blobs ── */
+.nebula {
+  position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
+}
+.nebula-1 { width: 600px; height: 600px; background: rgba(110,63,195,.12); top: -200px; right: -150px; }
+.nebula-2 { width: 500px; height: 500px; background: rgba(0,212,255,.07); bottom: -150px; left: -100px; }
+.nebula-3 { width: 400px; height: 400px; background: rgba(255,107,53,.06); top: 40%; left: 30%; }
+
+/* ── Layout ── */
+.page {
+  position: relative; z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 760px) {
+  .page { grid-template-columns: 1fr; }
+  .left-panel { display: none; }
+}
+
+/* ── Left: animated planet showcase ── */
+.left-panel {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 3rem; gap: 2rem; position: relative; overflow: hidden;
+}
+
+.orbit-system {
+  position: relative; width: 320px; height: 320px; flex-shrink: 0;
+}
+.main-planet {
+  position: absolute; inset: 0; margin: auto;
+  width: 160px; height: 160px;
+}
+.orbit-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(110,63,195,.2);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  animation: orbit-spin var(--speed) linear infinite;
+}
+.orbit-ring::after {
+  content: '';
+  position: absolute;
+  width: var(--dot-size, 8px); height: var(--dot-size, 8px);
+  background: var(--dot-color, var(--cyan));
+  border-radius: 50%;
+  top: -4px; left: 50%; transform: translateX(-50%);
+  box-shadow: 0 0 8px var(--dot-color, var(--cyan));
+}
+.ring-1 { width: 220px; height: 220px; --speed: 8s; --dot-size: 8px; --dot-color: #00d4ff; }
+.ring-2 { width: 290px; height: 290px; --speed: 14s; --dot-size: 6px; --dot-color: #9b6ef3; animation-direction: reverse; }
+.ring-3 { width: 340px; height: 340px; --speed: 22s; --dot-size: 5px; --dot-color: #ff6b35; }
+
+@keyframes orbit-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+.planet-canvas-login { border-radius: 50%; animation: float 5s ease-in-out infinite; }
+@keyframes float { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-12px); } }
+
+.showcase-text { text-align: center; }
+.showcase-text h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .5rem; }
+.showcase-text p { font-size: .9rem; color: var(--dim); line-height: 1.6; max-width: 300px; }
+
+.level-ticker {
+  font-family: 'Space Mono', monospace;
+  font-size: .7rem; letter-spacing: .12em;
+  color: var(--cyan); text-transform: uppercase;
+  background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
+  border-radius: 999px; padding: .3rem .9rem; margin-bottom: .8rem;
+  display: inline-block;
+}
+
+/* ── Right: login panel ── */
+.right-panel {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem;
+  border-left: 1px solid var(--border);
+}
+
+.login-card {
+  width: 100%; max-width: 400px;
+  background: rgba(13,21,37,.8);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  backdrop-filter: blur(12px);
+}
+
+.card-logo {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: 1.1rem; font-weight: 700; margin-bottom: 2.5rem;
+  justify-content: center;
+}
+.card-logo .icon { font-size: 1.6rem; }
+.card-logo span { color: var(--cyan); }
+
+.card-title {
+  font-size: 1.6rem; font-weight: 700; letter-spacing: -.03em;
+  margin-bottom: .5rem; text-align: center;
+}
+.card-sub {
+  font-size: .9rem; color: var(--dim); text-align: center;
+  line-height: 1.6; margin-bottom: 2rem;
+}
+
+/* ── GitHub button ── */
+.btn-github {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: .75rem;
+  background: #24292e;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: .95rem 1.5rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.btn-github::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(110,63,195,.3), rgba(0,212,255,.15));
+  opacity: 0; transition: opacity .2s;
+}
+.btn-github:hover { background: #2d3339; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+.btn-github:hover::before { opacity: 1; }
+.btn-github:active { transform: translateY(0); }
+
+.gh-icon { width: 22px; height: 22px; fill: currentColor; flex-shrink: 0; }
+
+/* ── Divider ── */
+.divider {
+  display: flex; align-items: center; gap: .8rem;
+  margin: 1.6rem 0; color: var(--dim); font-size: .8rem;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── Features list ── */
+.features {
+  list-style: none; display: flex; flex-direction: column; gap: .8rem;
+}
+.features li {
+  display: flex; align-items: flex-start; gap: .7rem;
+  font-size: .85rem; color: var(--dim); line-height: 1.5;
+}
+.feat-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(110,63,195,.15); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; flex-shrink: 0;
+}
+
+/* ── Error banner ── */
+.error-banner {
+  background: rgba(255,107,53,.12); border: 1px solid rgba(255,107,53,.3);
+  color: #ff9a6c; border-radius: 10px; padding: .8rem 1rem;
+  font-size: .85rem; margin-bottom: 1.2rem; text-align: center;
+  display: none;
+}
+
+/* ── Footer note ── */
+.card-footer {
+  margin-top: 1.8rem; text-align: center;
+  font-size: .75rem; color: var(--dim); line-height: 1.6;
+}
+.card-footer a { color: var(--vl); text-decoration: none; }
+
+/* ── Setup notice (shown when env vars missing) ── */
+.setup-notice {
+  background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
+  border-radius: 10px; padding: 1rem; margin-bottom: 1.4rem;
+  font-size: .82rem; line-height: 1.7; color: var(--text);
+}
+.setup-notice code {
+  font-family: 'Space Mono', monospace; font-size: .78rem;
+  background: rgba(0,0,0,.3); padding: .1em .35em; border-radius: 4px;
+  color: var(--cyan);
+}
+.setup-notice summary { cursor: pointer; font-weight: 600; color: var(--cyan); margin-bottom: .5rem; }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<div class="page">
+  <!-- Left: planet showcase -->
+  <div class="left-panel">
+    <div class="orbit-system">
+      <div class="orbit-ring ring-1"></div>
+      <div class="orbit-ring ring-2"></div>
+      <div class="orbit-ring ring-3"></div>
+      <div class="main-planet">
+        <canvas class="planet-canvas-login" id="planet-canvas" width="160" height="160"></canvas>
+      </div>
+    </div>
+    <div class="showcase-text">
+      <div class="level-ticker" id="level-ticker">🪐 Nível 5 · Planeta Oceânico</div>
+      <h2>Qual planeta é o seu?</h2>
+      <p>Seu histórico no GitHub vira um mundo único. Quanto mais você contribui, mais grandioso ele fica.</p>
+    </div>
+  </div>
+
+  <!-- Right: login -->
+  <div class="right-panel">
+    <div class="login-card">
+      <div class="card-logo">
+        <span class="icon">🪐</span>
+        Dev<span>Planet</span>
+      </div>
+
+      <div class="error-banner" id="error-banner"></div>
+
+      <div class="card-title">Bem-vindo ao cosmos</div>
+      <p class="card-sub">Entre com sua conta do GitHub para revelar o planeta gerado pelo seu perfil de dev.</p>
+
+      <div id="setup-notice" style="display:none">
+        <details class="setup-notice" open>
+          <summary>⚙️ Configuração necessária</summary>
+          Para ativar o login real, crie um <strong>GitHub OAuth App</strong> em
+          <a href="https://github.com/settings/developers" target="_blank" style="color:var(--cyan)">github.com/settings/developers</a>
+          e adicione ao arquivo <code>.env</code>:<br><br>
+          <code>GITHUB_CLIENT_ID=seu_client_id</code><br>
+          <code>GITHUB_CLIENT_SECRET=seu_secret</code><br>
+          <code>GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback</code><br>
+          <code>SESSION_SECRET=qualquer_string_aleatoria</code>
+        </details>
+      </div>
+
+      <a href="/auth/github" class="btn-github" id="login-btn">
+        <svg class="gh-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+        </svg>
+        Entrar com GitHub
+      </a>
+
+      <div class="divider">o que você ganha</div>
+
+      <ul class="features">
+        <li>
+          <div class="feat-icon">🪐</div>
+          <span>Planeta único gerado pelo seu histórico real de contribuições</span>
+        </li>
+        <li>
+          <div class="feat-icon">📊</div>
+          <span>Score calculado com estrelas, forks, repos, seguidores e linguagens</span>
+        </li>
+        <li>
+          <div class="feat-icon">🏆</div>
+          <span>Placar global com os devs mais ativos do universo</span>
+        </li>
+        <li>
+          <div class="feat-icon">🔒</div>
+          <span>Apenas leitura — nunca escrevemos nada no seu GitHub</span>
+        </li>
+      </ul>
+
+      <p class="card-footer">
+        Ao entrar, você concorda com nossa <a href="#">política de privacidade</a>.<br>
+        Dados lidos via <a href="https://docs.github.com/en/rest" target="_blank">GitHub REST API</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Stars ── */
+(function() {
+  const c = document.getElementById('stars'), ctx = c.getContext('2d');
+  let stars = [];
+  function resize() {
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    stars = Array.from({length: Math.floor(c.width*c.height/4000)}, () => ({
+      x: Math.random()*c.width, y: Math.random()*c.height,
+      r: Math.random()*1.3+.2, a: Math.random()*.7+.1,
+      sp: Math.random()*.5+.1, ph: Math.random()*Math.PI*2
+    }));
+  }
+  let t=0;
+  function draw() {
+    ctx.clearRect(0,0,c.width,c.height); t+=.007;
+    stars.forEach(s => {
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,210,255,${s.a*(0.6+0.4*Math.sin(t*s.sp+s.ph))})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  resize(); draw();
+  window.addEventListener('resize', resize);
+})();
+
+/* ── Demo planet (Oceânico level) ── */
+(function() {
+  const canvas = document.getElementById('planet-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height, R = W * 0.42;
+  const cx = W/2, cy = H/2;
+  let angle = 0;
+
+  function rng(seed) {
+    let s = seed >>> 0;
+    return function() {
+      s |= 0; s = s + 0x6D2B79F5 | 0;
+      let t = Math.imul(s ^ s>>>15, 1|s);
+      t = t + Math.imul(t^t>>>7, 61|t)^t;
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+
+  function draw(t) {
+    ctx.clearRect(0,0,W,H);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
+
+    // base
+    const g = ctx.createRadialGradient(cx-R*.25,cy-R*.25,R*.1,cx,cy,R);
+    g.addColorStop(0,'#5ba8ff'); g.addColorStop(.5,'#2563a8'); g.addColorStop(1,'#0a2a5c');
+    ctx.fillStyle=g; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+
+    // continents (animated subtle rotation)
+    const r2 = rng(42);
+    for(let i=0;i<4;i++){
+      const a = r2()*Math.PI*2 + t*0.003;
+      const d = r2()*R*.5;
+      const x=cx+Math.cos(a)*d, y=cy+Math.sin(a)*d*.7;
+      const sz=R*(0.18+r2()*.22);
+      const gr=ctx.createRadialGradient(x,y,0,x,y,sz);
+      gr.addColorStop(0,'rgba(45,138,78,.75)'); gr.addColorStop(.6,'rgba(45,138,78,.4)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=gr; ctx.beginPath();
+      const pts=7; for(let j=0;j<=pts;j++){const ang=(j/pts)*Math.PI*2;const rad=sz*(0.7+r2()*.6);const px=x+Math.cos(ang)*rad,py=y+Math.sin(ang)*rad*.75;j===0?ctx.moveTo(px,py):ctx.lineTo(px,py);} ctx.closePath(); ctx.fill();
+    }
+
+    // clouds
+    const r3=rng(77);
+    for(let i=0;i<12;i++){
+      const a=r3()*Math.PI*2+t*0.005*(i%2?1:-1);
+      const d=r3()*R*.72; const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d*.65;
+      const sz=R*(0.08+r3()*.1);
+      const gc=ctx.createRadialGradient(x,y,0,x,y,sz);
+      gc.addColorStop(0,'rgba(255,255,255,.42)'); gc.addColorStop(.5,'rgba(255,255,255,.12)'); gc.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=gc; ctx.beginPath(); ctx.ellipse(x,y,sz,sz*.5,r3()*Math.PI,0,Math.PI*2); ctx.fill();
+    }
+
+    // specular
+    const sp=ctx.createRadialGradient(cx-R*.3,cy-R*.35,0,cx-R*.1,cy-R*.1,R*.7);
+    sp.addColorStop(0,'rgba(255,255,255,.2)'); sp.addColorStop(.4,'rgba(255,255,255,.05)'); sp.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sp; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+
+    // shadow
+    const sh=ctx.createRadialGradient(cx+R*.55,cy+R*.1,0,cx+R*.3,cy,R*1.1);
+    sh.addColorStop(0,'rgba(0,0,0,.7)'); sh.addColorStop(.55,'rgba(0,0,0,.3)'); sh.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sh; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+    ctx.restore();
+
+    // atmosphere
+    const atm=ctx.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.18);
+    atm.addColorStop(0,'rgba(77,163,255,.28)'); atm.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=atm; ctx.beginPath(); ctx.arc(cx,cy,R*1.18,0,Math.PI*2); ctx.fill();
+
+    canvas.style.filter='drop-shadow(0 0 22px #2563a8aa)';
+    angle += .005;
+    requestAnimationFrame(()=>draw(angle));
+  }
+  draw(0);
+})();
+
+/* ── Check for error param ── */
+const params = new URLSearchParams(location.search);
+if (params.get('error')) {
+  const b = document.getElementById('error-banner');
+  b.textContent = 'Falha na autenticação com o GitHub. Tente novamente.';
+  b.style.display = 'block';
+}
+
+/* ── Check if server is configured ── */
+fetch('/api/me').then(r => {
+  if (r.status === 503) document.getElementById('setup-notice').style.display = 'block';
+}).catch(() => {});
+
+/* ── Level ticker cycle ── */
+const levels = ['🪨 Nível 1 · Asteroide','🌑 Nível 2 · Proto-planeta','🌍 Nível 3 · Planeta Terrestre','🌿 Nível 4 · Mundo Verde','🌊 Nível 5 · Planeta Oceânico','🌟 Nível 6 · Gigante Gasoso','🧊 Nível 7 · Gigante de Gelo','🌌 Nível 8 · Planeta Nebulosa','☀️ Nível 9 · Estrela Dev'];
+let li = 4;
+const ticker = document.getElementById('level-ticker');
+setInterval(() => { li = (li+1)%levels.length; ticker.style.opacity=0; setTimeout(()=>{ticker.textContent=levels[li];ticker.style.opacity=1;},300); }, 2500);
+ticker.style.transition='opacity .3s';
+</script>
+</body>
+</html>
