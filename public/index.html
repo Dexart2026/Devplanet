@@ -6,316 +6,91 @@
 <title>DevPlanet — Seu Código, Seu Cosmos</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --void:#02020a;--gold:#c9a84c;--gold-b:#e8c96a;--gold-d:#8a6a20;
+  --cream:#f5e6c8;--star:#fefefe;--dim:#7a6a4a;
+  --border:rgba(201,168,76,.15);--border-h:rgba(201,168,76,.4);
+}
+html,body{height:100%;background:var(--void);color:var(--cream);font-family:'Inter',sans-serif;overflow:hidden;}
+#bg-canvas{position:fixed;inset:0;z-index:0;}
+#particle-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.page{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:1fr 420px;}
+@media(max-width:820px){.page{grid-template-columns:1fr}.right{display:none}}
 
-:root {
-  --void:    #02020a;
-  --deep:    #07060f;
-  --gold:    #c9a84c;
-  --gold-b:  #e8c96a;
-  --gold-d:  #8a6a20;
-  --amber:   #ff9f43;
-  --cream:   #f5e6c8;
-  --star:    #fefefe;
-  --dim:     #7a6a4a;
-  --border:  rgba(201,168,76,.15);
-  --border-h:rgba(201,168,76,.4);
-}
+/* LEFT */
+.left{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:2rem;position:relative;}
+.left::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
 
-html, body { height: 100%; background: var(--void); color: var(--cream); font-family: 'Inter', sans-serif; overflow: hidden; }
+.hero-planet-wrap{position:relative;width:340px;height:340px;display:flex;align-items:center;justify-content:center;}
 
-/* ── Canvas layers ── */
-#bg-canvas { position: fixed; inset: 0; z-index: 0; }
-#particle-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+/* Orbital rings — purely CSS, no canvas clipping issues */
+.orbit{position:absolute;border-radius:50%;border:1px solid;top:50%;left:50%;transform:translate(-50%,-50%);}
+.orbit-1{width:410px;height:410px;border-color:rgba(201,168,76,.07);animation:odrift 18s linear infinite;}
+.orbit-2{width:490px;height:490px;border-color:rgba(201,168,76,.04);animation:odrift 30s linear infinite reverse;}
+.orbit::after{content:'';position:absolute;border-radius:50%;background:var(--gold-b);box-shadow:0 0 10px var(--gold-b),0 0 20px var(--gold);top:-3px;left:50%;transform:translateX(-50%);}
+.orbit-1::after{width:6px;height:6px;}
+.orbit-2::after{width:4px;height:4px;opacity:.6;}
+@keyframes odrift{to{transform:translate(-50%,-50%) rotate(360deg);}}
 
-/* ── Layout ── */
-.page {
-  position: relative; z-index: 2;
-  height: 100vh;
-  display: grid;
-  grid-template-columns: 1fr 420px;
-}
-@media(max-width:820px){ .page{grid-template-columns:1fr} .left{display:none} }
+#hero-planet{border-radius:50%;animation:lev 7s ease-in-out infinite;position:relative;z-index:2;}
+@keyframes lev{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
 
-/* ══════════════════════════════════════
-   LEFT — Hero planet
-══════════════════════════════════════ */
-.left {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 3rem; gap: 2.5rem;
-  position: relative;
-}
+.hero-text{text-align:center;max-width:380px;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;}
+.eyebrow::before,.eyebrow::after{content:'';width:28px;height:1px;background:var(--gold-d);}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4vw,3.2rem);font-weight:300;line-height:1.1;color:var(--star);margin-bottom:.8rem;}
+.hero-title em{font-style:italic;color:var(--gold-b);}
+.hero-sub{font-size:.85rem;color:var(--dim);line-height:1.8;font-weight:300;}
+.ticker-wrap{display:flex;gap:.45rem;flex-wrap:wrap;justify-content:center;margin-top:1.1rem;}
+.ticker{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:.07em;padding:.25rem .65rem;border:1px solid rgba(201,168,76,.1);border-radius:3px;transition:all .5s;}
+.ticker.active{color:var(--gold-b);border-color:rgba(201,168,76,.38);background:rgba(201,168,76,.05);box-shadow:0 0 10px rgba(201,168,76,.08);}
 
-/* Radial gold glow behind planet */
-.left::before {
-  content: '';
-  position: absolute;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(201,168,76,.12) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.hero-planet-wrap {
-  position: relative;
-  width: 360px; height: 360px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-/* Orbital rings around hero planet */
-.orbit {
-  position: absolute; border-radius: 50%;
-  border: 1px solid;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-}
-.orbit-1 { width: 420px; height: 420px; border-color: rgba(201,168,76,.08); animation: drift 20s linear infinite; }
-.orbit-2 { width: 500px; height: 500px; border-color: rgba(201,168,76,.05); animation: drift 35s linear infinite reverse; }
-.orbit-3 { width: 580px; height: 580px; border-color: rgba(201,168,76,.03); animation: drift 55s linear infinite; }
-
-/* Orbital dots */
-.orbit::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  background: var(--gold-b);
-  box-shadow: 0 0 10px var(--gold-b), 0 0 20px var(--gold);
-  top: 0; left: 50%; transform: translateX(-50%);
-}
-.orbit-1::after { width: 6px; height: 6px; }
-.orbit-2::after { width: 4px; height: 4px; opacity: .7; }
-.orbit-3::after { width: 3px; height: 3px; opacity: .4; }
-
-@keyframes drift { to { transform: translate(-50%,-50%) rotate(360deg); } }
-
-#hero-planet {
-  border-radius: 50%;
-  animation: levitate 7s ease-in-out infinite;
-  position: relative; z-index: 2;
-  filter: drop-shadow(0 0 60px rgba(201,168,76,.5)) drop-shadow(0 0 120px rgba(201,168,76,.2));
-}
-@keyframes levitate { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
-
-.hero-text { text-align: center; max-width: 380px; }
-
-.eyebrow {
-  font-family: 'Space Mono', monospace;
-  font-size: .65rem; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 1rem;
-  display: flex; align-items: center; justify-content: center; gap: .6rem;
-}
-.eyebrow::before, .eyebrow::after {
-  content: ''; width: 30px; height: 1px; background: var(--gold-d);
-}
-
-.hero-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2.4rem, 4vw, 3.4rem);
-  font-weight: 300; line-height: 1.1;
-  letter-spacing: -.01em;
-  color: var(--star); margin-bottom: .8rem;
-}
-.hero-title em { font-style: italic; color: var(--gold-b); }
-
-.hero-sub {
-  font-size: .88rem; color: var(--dim); line-height: 1.75;
-  font-weight: 300;
-}
-
-/* Level ticker */
-.ticker-wrap {
-  display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-top: 1.2rem;
-}
-.ticker {
-  font-family: 'Space Mono', monospace; font-size: .65rem;
-  color: var(--gold-d); letter-spacing: .08em;
-  padding: .3rem .7rem;
-  border: 1px solid rgba(201,168,76,.15);
-  border-radius: 4px;
-  transition: all .4s;
-}
-.ticker.active {
-  color: var(--gold-b);
-  border-color: rgba(201,168,76,.4);
-  background: rgba(201,168,76,.06);
-  box-shadow: 0 0 12px rgba(201,168,76,.1);
-}
-
-/* ══════════════════════════════════════
-   RIGHT — Login panel
-══════════════════════════════════════ */
-.right {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 2rem;
-  border-left: 1px solid var(--border);
-  background: linear-gradient(160deg, rgba(201,168,76,.03) 0%, transparent 60%);
-  position: relative; overflow: hidden;
-}
-
-/* Top-right corner ornament */
-.right::before {
-  content: '';
-  position: absolute; top: 0; right: 0;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle at top right, rgba(201,168,76,.08), transparent 70%);
-  pointer-events: none;
-}
-
-.card {
-  width: 100%; max-width: 360px;
-  position: relative;
-}
-
-/* Gold line top accent */
-.card::before {
-  content: '';
-  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 60px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-
-.card-inner {
-  background: rgba(7,6,15,.85);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 2.8rem 2.2rem 2.2rem;
-  backdrop-filter: blur(20px);
-  position: relative;
-}
-
-/* Corner marks */
-.card-inner::before, .card-inner::after {
-  content: '';
-  position: absolute;
-  width: 12px; height: 12px;
-  border-color: var(--gold-d);
-  border-style: solid;
-}
-.card-inner::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
-.card-inner::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
-
-.card-logo {
-  text-align: center; margin-bottom: 2.5rem;
-}
-.logo-symbol {
-  font-size: 2rem; display: block; margin-bottom: .5rem;
-  filter: drop-shadow(0 0 12px rgba(201,168,76,.6));
-}
-.logo-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem; font-weight: 300; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--cream);
-}
-.logo-name span { color: var(--gold-b); }
-
-.card-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.7rem; font-weight: 300;
-  line-height: 1.2; margin-bottom: .5rem;
-  color: var(--star);
-}
-.card-sub {
-  font-size: .82rem; color: var(--dim); line-height: 1.7;
-  margin-bottom: 2rem; font-weight: 300;
-}
-
-/* Error */
-.error-msg {
-  background: rgba(255,100,50,.08);
-  border: 1px solid rgba(255,100,50,.25);
-  color: #ff8060; border-radius: 2px;
-  padding: .7rem 1rem; font-size: .8rem;
-  margin-bottom: 1.2rem; text-align: center;
-  display: none;
-}
-
-/* GitHub button */
-.btn-github {
-  width: 100%;
-  display: flex; align-items: center; justify-content: center; gap: .8rem;
-  background: transparent;
-  color: var(--cream);
-  border: 1px solid var(--border-h);
-  border-radius: 2px;
-  padding: 1rem 1.5rem;
-  font-family: 'Space Mono', monospace;
-  font-size: .8rem; letter-spacing: .06em;
-  cursor: pointer; text-decoration: none;
-  position: relative; overflow: hidden;
-  transition: color .25s, border-color .25s;
-}
-.btn-github::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(201,168,76,.12), rgba(201,168,76,.05));
-  opacity: 0; transition: opacity .25s;
-}
-.btn-github:hover { color: var(--gold-b); border-color: var(--gold); }
-.btn-github:hover::before { opacity: 1; }
-
-/* Gold shimmer on button hover */
-.btn-github::after {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(201,168,76,.15), transparent);
-  transition: left .5s;
-}
-.btn-github:hover::after { left: 140%; }
-
-.gh-icon { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
-
-/* Divider */
-.divider {
-  display: flex; align-items: center; gap: .8rem;
-  margin: 1.6rem 0; color: var(--dim); font-size: .7rem;
-  font-family: 'Space Mono', monospace; letter-spacing: .1em;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border));
-}
-.divider::after { background: linear-gradient(90deg, var(--border), transparent); }
-
-/* Features */
-.features { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
-.features li {
-  display: flex; align-items: flex-start; gap: .7rem;
-  font-size: .8rem; color: var(--dim); line-height: 1.5; font-weight: 300;
-}
-.feat-mark {
-  font-family: 'Space Mono', monospace; font-size: .65rem;
-  color: var(--gold-d); margin-top: .1rem; flex-shrink: 0;
-}
-
-.card-footer {
-  margin-top: 2rem; text-align: center;
-  font-size: .7rem; color: var(--dim); line-height: 1.6;
-  border-top: 1px solid var(--border); padding-top: 1.2rem;
-  font-weight: 300;
-}
-.card-footer a { color: var(--gold-d); text-decoration: none; transition: color .2s; }
-.card-footer a:hover { color: var(--gold); }
+/* RIGHT */
+.right{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;border-left:1px solid var(--border);background:linear-gradient(160deg,rgba(201,168,76,.025) 0%,transparent 60%);position:relative;}
+.right::before{content:'';position:absolute;top:0;right:0;width:180px;height:180px;background:radial-gradient(circle at top right,rgba(201,168,76,.07),transparent 70%);pointer-events:none;}
+.card{width:100%;max-width:360px;position:relative;}
+.card::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.card-inner{background:rgba(7,6,15,.88);border:1px solid var(--border);border-radius:2px;padding:2.6rem 2.1rem 2.1rem;backdrop-filter:blur(20px);position:relative;}
+.card-inner::before,.card-inner::after{content:'';position:absolute;width:10px;height:10px;border-color:var(--gold-d);border-style:solid;}
+.card-inner::before{top:-1px;left:-1px;border-width:1px 0 0 1px;}
+.card-inner::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0;}
+.card-logo{text-align:center;margin-bottom:2.2rem;}
+.logo-symbol{font-size:1.8rem;display:block;margin-bottom:.4rem;filter:drop-shadow(0 0 10px rgba(201,168,76,.6));}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;letter-spacing:.14em;text-transform:uppercase;color:var(--cream);}
+.logo-name span{color:var(--gold-b);}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:.45rem;color:var(--star);}
+.card-sub{font-size:.8rem;color:var(--dim);line-height:1.75;margin-bottom:1.8rem;font-weight:300;}
+.error-msg{background:rgba(255,100,50,.07);border:1px solid rgba(255,100,50,.22);color:#ff8060;border-radius:2px;padding:.65rem 1rem;font-size:.78rem;margin-bottom:1.1rem;text-align:center;display:none;}
+.btn-github{width:100%;display:flex;align-items:center;justify-content:center;gap:.75rem;background:transparent;color:var(--cream);border:1px solid var(--border-h);border-radius:2px;padding:.95rem 1.5rem;font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.07em;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:color .25s,border-color .25s;}
+.btn-github::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.04));opacity:0;transition:opacity .25s;}
+.btn-github:hover{color:var(--gold-b);border-color:var(--gold);}
+.btn-github:hover::before{opacity:1;}
+.btn-github::after{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(201,168,76,.13),transparent);transition:left .55s;}
+.btn-github:hover::after{left:145%;}
+.gh-icon{width:17px;height:17px;fill:currentColor;flex-shrink:0;}
+.divider{display:flex;align-items:center;gap:.8rem;margin:1.5rem 0;color:var(--dim);font-size:.65rem;font-family:'Space Mono',monospace;letter-spacing:.1em;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;}
+.divider::before{background:linear-gradient(90deg,transparent,var(--border));}
+.divider::after{background:linear-gradient(90deg,var(--border),transparent);}
+.features{list-style:none;display:flex;flex-direction:column;gap:.65rem;}
+.features li{display:flex;align-items:flex-start;gap:.65rem;font-size:.78rem;color:var(--dim);line-height:1.55;font-weight:300;}
+.feat-mark{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--gold-d);margin-top:.1rem;flex-shrink:0;}
+.card-footer{margin-top:1.8rem;text-align:center;font-size:.68rem;color:var(--dim);line-height:1.6;border-top:1px solid var(--border);padding-top:1.1rem;font-weight:300;}
+.card-footer a{color:var(--gold-d);text-decoration:none;transition:color .2s;}
+.card-footer a:hover{color:var(--gold);}
 </style>
 </head>
 <body>
-
 <canvas id="bg-canvas"></canvas>
 <canvas id="particle-canvas"></canvas>
-
 <div class="page">
-  <!-- LEFT -->
   <div class="left">
     <div class="hero-planet-wrap">
       <div class="orbit orbit-1"></div>
       <div class="orbit orbit-2"></div>
-      <div class="orbit orbit-3"></div>
-      <canvas id="hero-planet" width="280" height="280"></canvas>
+      <canvas id="hero-planet" width="260" height="260"></canvas>
     </div>
-
     <div class="hero-text">
       <div class="eyebrow">Cosmos do Código</div>
       <h1 class="hero-title">Seu GitHub<br>é um <em>planeta vivo</em></h1>
@@ -323,8 +98,6 @@ html, body { height: 100%; background: var(--void); color: var(--cream); font-fa
       <div class="ticker-wrap" id="ticker-wrap"></div>
     </div>
   </div>
-
-  <!-- RIGHT -->
   <div class="right">
     <div class="card">
       <div class="card-inner">
@@ -332,279 +105,257 @@ html, body { height: 100%; background: var(--void); color: var(--cream); font-fa
           <span class="logo-symbol">✦</span>
           <div class="logo-name">Dev<span>Planet</span></div>
         </div>
-
         <div class="error-msg" id="error-msg"></div>
-
         <div class="card-title">Entre no cosmos</div>
         <p class="card-sub">Conecte sua conta GitHub e veja qual mundo o seu histórico de dev revelou.</p>
-
         <a href="/auth/github" class="btn-github">
           <svg class="gh-icon" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
           Entrar com GitHub
         </a>
-
         <div class="divider">o que te espera</div>
-
         <ul class="features">
           <li><span class="feat-mark">✦</span><span>Planeta único gerado pelo DNA do seu GitHub — nunca dois iguais</span></li>
           <li><span class="feat-mark">✦</span><span>Superfície, atmosfera e anéis evoluem com suas contribuições</span></li>
           <li><span class="feat-mark">✦</span><span>Placar galáctico entre os devs mais ativos do universo</span></li>
           <li><span class="feat-mark">✦</span><span>Acesso apenas leitura — jamais escrevemos no seu GitHub</span></li>
         </ul>
-
-        <p class="card-footer">
-          Dados via <a href="https://docs.github.com/en/rest" target="_blank">GitHub REST API</a> · <a href="#">Privacidade</a>
-        </p>
+        <p class="card-footer">Dados via <a href="https://docs.github.com/en/rest" target="_blank">GitHub REST API</a> · <a href="#">Privacidade</a></p>
       </div>
     </div>
   </div>
 </div>
-
 <script>
-/* ══════════════════════════
-   NEBULA BACKGROUND
-══════════════════════════ */
+/* ── Background nebula + stars ── */
 (function(){
-  const c = document.getElementById('bg-canvas');
-  const ctx = c.getContext('2d');
-
-  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
-  resize(); window.addEventListener('resize', resize);
-
-  // Static nebula blobs
-  function drawNebula(){
+  const c=document.getElementById('bg-canvas'),ctx=c.getContext('2d');
+  function resize(){c.width=innerWidth;c.height=innerHeight;draw();}
+  function draw(){
     ctx.clearRect(0,0,c.width,c.height);
+    const bg=ctx.createRadialGradient(c.width*.45,c.height*.5,0,c.width*.45,c.height*.5,c.width);
+    bg.addColorStop(0,'#08060f');bg.addColorStop(1,'#02020a');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);
+    [{x:.12,y:.25,r:.4,a:.05},{x:.7,y:.65,r:.45,a:.035},{x:.5,y:.5,r:.65,a:.025},{x:.88,y:.12,r:.28,a:.03},{x:.08,y:.82,r:.32,a:.025}].forEach(b=>{
+      const g=ctx.createRadialGradient(c.width*b.x,c.height*b.y,0,c.width*b.x,c.height*b.y,c.width*b.r);
+      g.addColorStop(0,`rgba(201,168,76,${b.a})`);g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+    });
+    function srnd(n){let x=Math.sin(n*127.1+311.7)*43758.5;return x-Math.floor(x);}
+    const ns=Math.floor(c.width*c.height/2400);
+    for(let i=0;i<ns;i++){
+      const x=srnd(i)*c.width,y=srnd(i+ns)*c.height,r=srnd(i+ns*2)*1.6+.15;
+      const gold=srnd(i+ns*3)>.91;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=gold?`rgba(201,168,76,${srnd(i*.3)*.55+.2})`:`rgba(245,230,200,${srnd(i*.3)*.4+.07})`;
+      ctx.fill();
+      if(gold&&r>1.1){const g2=ctx.createRadialGradient(x,y,0,x,y,r*5);g2.addColorStop(0,'rgba(201,168,76,.12)');g2.addColorStop(1,'transparent');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(x,y,r*5,0,Math.PI*2);ctx.fill();}
+    }
+  }
+  resize();window.addEventListener('resize',()=>{resize();});
+})();
 
-    // Deep space gradient
-    const bg = ctx.createRadialGradient(c.width*.5, c.height*.5, 0, c.width*.5, c.height*.5, c.width);
-    bg.addColorStop(0, '#07060f');
-    bg.addColorStop(1, '#02020a');
-    ctx.fillStyle = bg; ctx.fillRect(0,0,c.width,c.height);
+/* ── Floating particles ── */
+(function(){
+  const c=document.getElementById('particle-canvas'),ctx=c.getContext('2d');
+  let pts=[];
+  function resize(){c.width=innerWidth;c.height=innerHeight;pts=Array.from({length:50},()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.16,vy:(Math.random()-.5)*.16,r:Math.random()*1.6+.3,a:Math.random()*.4+.05,ph:Math.random()*Math.PI*2,sp:Math.random()*.5+.2,gold:Math.random()>.58}));}
+  let t=0;
+  function draw(){ctx.clearRect(0,0,c.width,c.height);t+=.007;
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<-5)p.x=c.width+5;if(p.x>c.width+5)p.x=-5;if(p.y<-5)p.y=c.height+5;if(p.y>c.height+5)p.y=-5;
+      const a=p.a*(0.5+0.5*Math.sin(t*p.sp+p.ph));
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.gold?`rgba(201,168,76,${a})`:`rgba(245,230,200,${a*.4})`;ctx.fill();});
+    requestAnimationFrame(draw);}
+  resize();draw();window.addEventListener('resize',resize);
+})();
 
-    // Gold nebula clouds
-    const blobs = [
-      {x:.15,y:.2,r:.35,c:'rgba(201,168,76,.04)'},
-      {x:.75,y:.7,r:.4,c:'rgba(201,168,76,.03)'},
-      {x:.5,y:.5,r:.6,c:'rgba(140,80,20,.03)'},
-      {x:.85,y:.15,r:.25,c:'rgba(255,159,67,.03)'},
-      {x:.1,y:.8,r:.3,c:'rgba(201,168,76,.025)'},
+/* ══════════════════════════════════════════
+   HERO PLANET — fully animated
+   Level 5 (Gigante Gasoso) shown on login
+══════════════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('hero-planet');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2,R=W*.41;
+
+  // Seeded RNG
+  function srng(seed){let s=seed>>>0;return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  const rng=srng(0xC0FFEE);
+
+  // Pre-generate cloud positions
+  const clouds=Array.from({length:18},()=>({
+    a:rng()*Math.PI*2, d:rng()*.72, w:rng()*.13+.06, h:rng()*.055+.025,
+    speed:rng()*.0018+.0004, phase:rng()*Math.PI*2
+  }));
+  // Pre-generate band definitions
+  const bands=[
+    {y:-.72,h:.14,c:[180,110,35]},{y:-.52,h:.09,c:[100,58,12]},
+    {y:-.38,h:.18,c:[195,140,45]},{y:-.14,h:.08,c:[80,45,8]},
+    {y:.02, h:.20,c:[200,148,50]},{y:.28, h:.09,c:[90,52,10]},
+    {y:.44, h:.15,c:[170,105,30]},{y:.65, h:.10,c:[110,65,15]},
+  ];
+  // Storm oval
+  const storm={x:R*.28,y:-R*.08,rx:R*.16,ry:R*.09,speed:.0022};
+
+  let rot=0,stormAngle=0;
+
+  function drawRings(front){
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.scale(1,.30); // Saturn-like tilt
+
+    if(front){
+      // Only draw bottom half (in front of planet)
+      ctx.beginPath();
+      ctx.rect(-R*2.8, 2, R*5.6, R*3);
+      ctx.clip();
+    } else {
+      // Only draw top half (behind planet)
+      ctx.beginPath();
+      ctx.rect(-R*2.8, -R*3, R*5.6, R*3-2);
+      ctx.clip();
+    }
+
+    // Ring layers — thin, bright, golden
+    const ringDefs=[
+      {inner:1.22,outer:1.32,alpha:.7,bright:.9},
+      {inner:1.36,outer:1.42,alpha:.5,bright:.7},
+      {inner:1.46,outer:1.50,alpha:.35,bright:.5},
+      {inner:1.54,outer:1.57,alpha:.22,bright:.35},
     ];
-    blobs.forEach(b=>{
-      const g = ctx.createRadialGradient(c.width*b.x, c.height*b.y, 0, c.width*b.x, c.height*b.y, c.width*b.r);
-      g.addColorStop(0, b.c); g.addColorStop(1, 'transparent');
-      ctx.fillStyle=g; ctx.fillRect(0,0,c.width,c.height);
+
+    ringDefs.forEach(rd=>{
+      const mid=(rd.inner+rd.outer)/2*R;
+      const lw=(rd.outer-rd.inner)*R;
+
+      // Base ring
+      const g=ctx.createLinearGradient(-mid,0,mid,0);
+      g.addColorStop(0,  `rgba(201,168,76,${rd.alpha*.4})`);
+      g.addColorStop(.25,`rgba(232,201,106,${rd.alpha})`);
+      g.addColorStop(.5, `rgba(255,225,140,${rd.bright})`);
+      g.addColorStop(.75,`rgba(232,201,106,${rd.alpha})`);
+      g.addColorStop(1,  `rgba(201,168,76,${rd.alpha*.4})`);
+
+      ctx.strokeStyle=g;
+      ctx.lineWidth=Math.max(lw,1.5);
+      ctx.beginPath();
+      ctx.arc(0,0,mid,0,Math.PI*2);
+      ctx.stroke();
+
+      // Bright inner edge highlight
+      ctx.strokeStyle=`rgba(255,240,180,${rd.bright*.35})`;
+      ctx.lineWidth=.8;
+      ctx.beginPath();
+      ctx.arc(0,0,rd.inner*R,0,Math.PI*2);
+      ctx.stroke();
     });
 
-    // Stars
-    const seed = 42;
-    function rng(n){ let x=Math.sin(n+seed)*10000; return x-Math.floor(x); }
-    const nStars = Math.floor(c.width*c.height/2200);
-    for(let i=0;i<nStars;i++){
-      const x=rng(i*3)*c.width, y=rng(i*3+1)*c.height;
-      const r=rng(i*3+2)*1.5+.2;
-      const gold = rng(i*7) > .93; // 7% gold stars
-      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fillStyle = gold ? `rgba(201,168,76,${rng(i*.4)*.6+.2})` : `rgba(245,230,200,${rng(i*.4)*.5+.1})`;
-      ctx.fill();
-      if(gold && r > 1.2){
-        const g2=ctx.createRadialGradient(x,y,0,x,y,r*4);
-        g2.addColorStop(0,'rgba(201,168,76,.15)'); g2.addColorStop(1,'transparent');
-        ctx.fillStyle=g2; ctx.fill();
-      }
-    }
-  }
-  drawNebula();
-  window.addEventListener('resize',()=>{ resize(); drawNebula(); });
-})();
-
-/* ══════════════════════════
-   FLOATING GOLD PARTICLES
-══════════════════════════ */
-(function(){
-  const c = document.getElementById('particle-canvas');
-  const ctx = c.getContext('2d');
-  let pts = [];
-
-  function resize(){ c.width=window.innerWidth; c.height=window.innerHeight; init(); }
-
-  function init(){
-    pts = Array.from({length:55},()=>({
-      x: Math.random()*c.width, y: Math.random()*c.height,
-      vx: (Math.random()-.5)*.18, vy: (Math.random()-.5)*.18,
-      r: Math.random()*1.8+.3,
-      a: Math.random()*.45+.05,
-      gold: Math.random()>.6,
-      phase: Math.random()*Math.PI*2,
-      speed: Math.random()*.6+.2,
-    }));
+    ctx.restore();
   }
 
-  let t=0;
-  function draw(){
-    ctx.clearRect(0,0,c.width,c.height); t+=.008;
-    for(const p of pts){
-      p.x += p.vx; p.y += p.vy;
-      if(p.x<-10) p.x=c.width+10;
-      if(p.x>c.width+10) p.x=-10;
-      if(p.y<-10) p.y=c.height+10;
-      if(p.y>c.height+10) p.y=-10;
-      const pulse = p.a*(0.5+0.5*Math.sin(t*p.speed+p.phase));
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = p.gold ? `rgba(201,168,76,${pulse})` : `rgba(245,230,200,${pulse*.5})`;
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  resize(); draw();
-  window.addEventListener('resize', resize);
-})();
-
-/* ══════════════════════════
-   HERO PLANET (rotating luxury)
-══════════════════════════ */
-(function(){
-  const canvas = document.getElementById('hero-planet');
-  const ctx = canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, R=W*.41;
-
-  function rng(seed){
-    let s=seed>>>0;
-    return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
-  }
-  const r1=rng(0xDEAD);
-
-  let rot=0;
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // Save for ring behind
+    // Rings BEHIND planet
+    drawRings(false);
+
+    // ── Sphere clip ──
     ctx.save();
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
 
-    // Rings behind planet
-    ctx.save();
-    ctx.translate(cx,cy); ctx.scale(1,.28);
-    for(let i=3;i>=0;i--){
-      const inn=R*(1.28+i*.2), out=inn+R*.1;
-      const alpha=[.55,.42,.3,.18][i];
-      const g=ctx.createLinearGradient(-out,0,out,0);
-      const c1=`rgba(201,168,76,${alpha+.1})`, c2=`rgba(138,106,32,${alpha})`;
-      g.addColorStop(0,c2); g.addColorStop(.35,c1); g.addColorStop(.65,c1); g.addColorStop(1,c2);
-      ctx.strokeStyle=g; ctx.lineWidth=out-inn;
-      ctx.beginPath(); ctx.arc(0,0,(inn+out)/2,0,Math.PI*2); ctx.stroke();
-    }
-    ctx.restore();
+    // Base color — deep amber
+    const base=ctx.createRadialGradient(cx-R*.18,cy-R*.18,R*.04,cx,cy,R);
+    base.addColorStop(0,'#7a5018');
+    base.addColorStop(.4,'#3e2208');
+    base.addColorStop(1,'#180b02');
+    ctx.fillStyle=base;ctx.fillRect(cx-R-1,cy-R-1,R*2+2,R*2+2);
 
-    // Clip to sphere
-    ctx.save();
-    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
-
-    // Base — deep amber-gold
-    const base=ctx.createRadialGradient(cx-R*.2,cy-R*.2,R*.05,cx,cy,R);
-    base.addColorStop(0,'#6b4a1a');
-    base.addColorStop(.4,'#3d2a0c');
-    base.addColorStop(1,'#1a0f04');
-    ctx.fillStyle=base; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
-
-    // Band system (rotates)
-    const bands=[
-      {y:-.6,h:.18,c:'rgba(180,120,40,.35)'},
-      {y:-.35,h:.12,c:'rgba(100,65,15,.4)'},
-      {y:-.1,h:.22,c:'rgba(201,150,50,.22)'},
-      {y:.2,h:.1, c:'rgba(80,50,10,.45)'},
-      {y:.38,h:.2, c:'rgba(160,100,30,.3)'},
-      {y:.65,h:.12,c:'rgba(120,75,20,.35)'},
-    ];
+    // Rotating band texture via offset
+    const bandOff=rot*R*2; // horizontal scroll offset
     bands.forEach(b=>{
-      const ry=cy+b.y*R;
-      ctx.fillStyle=b.c;
-      ctx.fillRect(cx-R,ry,R*2,b.h*R);
+      const ypos=cy+b.y*R;
+      const bh=b.h*R;
+      // Draw band tiles to cover full width even when scrolled
+      for(let tx=-R*2;tx<R*2+Math.abs(bandOff);tx+=R*4){
+        const bx=cx-R+((tx+bandOff)%(R*4));
+        ctx.fillStyle=`rgba(${b.c[0]},${b.c[1]},${b.c[2]},.28)`;
+        ctx.fillRect(bx,ypos,R*4,bh);
+      }
     });
 
-    // Storm swirl (unique feature)
+    // Storm swirl (rotates independently)
+    const sx=cx+Math.cos(stormAngle)*storm.x;
+    const sy=cy+Math.sin(stormAngle*0.3)*storm.y;
     ctx.save();
-    ctx.translate(cx+R*.25+Math.sin(rot*.3)*R*.08, cy-R*.1);
-    const storm=ctx.createRadialGradient(0,0,0,0,0,R*.18);
-    storm.addColorStop(0,'rgba(255,180,60,.5)');
-    storm.addColorStop(.5,'rgba(200,130,40,.2)');
-    storm.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=storm;
-    ctx.rotate(rot);
-    ctx.scale(1,.6);
-    ctx.beginPath(); ctx.arc(0,0,R*.18,0,Math.PI*2); ctx.fill();
+    ctx.translate(sx,sy);
+    ctx.rotate(rot*2);
+    const sg=ctx.createRadialGradient(0,0,0,0,0,storm.rx);
+    sg.addColorStop(0,'rgba(255,190,70,.6)');
+    sg.addColorStop(.5,'rgba(210,150,45,.25)');
+    sg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sg;
+    ctx.beginPath();ctx.ellipse(0,0,storm.rx,storm.ry,0,0,Math.PI*2);ctx.fill();
+    // Inner bright core
+    const sc=ctx.createRadialGradient(0,0,0,0,0,storm.rx*.4);
+    sc.addColorStop(0,'rgba(255,220,120,.45)');
+    sc.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sc;
+    ctx.beginPath();ctx.ellipse(0,0,storm.rx*.4,storm.ry*.4,0,0,Math.PI*2);ctx.fill();
     ctx.restore();
 
-    // Surface craters
-    const cr=rng(0xBEEF);
-    for(let i=0;i<12;i++){
-      const a=cr()*Math.PI*2, d=cr()*R*.75;
-      const x=cx+Math.cos(a+rot*.1)*d, y=cy+Math.sin(a+rot*.1)*d*.9;
-      const sz=R*(cr()*.06+.02);
-      const cg=ctx.createRadialGradient(x-sz*.3,y-sz*.3,0,x,y,sz);
-      cg.addColorStop(0,'rgba(0,0,0,.6)');
-      cg.addColorStop(.7,'rgba(0,0,0,.2)');
-      cg.addColorStop(1,'rgba(0,0,0,0)');
+    // Animated clouds
+    clouds.forEach(cl=>{
+      const a=cl.a+rot*cl.speed*80;
+      const x=cx+Math.cos(a)*cl.d*R;
+      const y=cy+Math.sin(a)*cl.d*R*.65;
+      const cg=ctx.createRadialGradient(x,y,0,x,y,cl.w*R);
+      cg.addColorStop(0,'rgba(255,255,255,.32)');
+      cg.addColorStop(.5,'rgba(255,255,255,.1)');
+      cg.addColorStop(1,'rgba(255,255,255,0)');
       ctx.fillStyle=cg;
-      ctx.beginPath(); ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
-    }
+      ctx.beginPath();ctx.ellipse(x,y,cl.w*R,cl.h*R,a,0,Math.PI*2);ctx.fill();
+    });
 
     // Specular highlight
-    const spec=ctx.createRadialGradient(cx-R*.32,cy-R*.38,0,cx-R*.1,cy-R*.15,R*.75);
-    spec.addColorStop(0,'rgba(255,220,140,.3)');
-    spec.addColorStop(.4,'rgba(255,200,100,.08)');
-    spec.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=spec; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+    const sp=ctx.createRadialGradient(cx-R*.28,cy-R*.35,0,cx-R*.08,cy-R*.1,R*.7);
+    sp.addColorStop(0,'rgba(255,220,140,.28)');
+    sp.addColorStop(.4,'rgba(255,200,100,.07)');
+    sp.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sp;ctx.fillRect(cx-R-1,cy-R-1,R*2+2,R*2+2);
 
     // Terminator shadow
-    const sh=ctx.createRadialGradient(cx+R*.6,cy+R*.1,0,cx+R*.25,cy,R*1.05);
-    sh.addColorStop(0,'rgba(0,0,0,.85)');
-    sh.addColorStop(.5,'rgba(0,0,0,.35)');
+    const sh=ctx.createRadialGradient(cx+R*.58,cy+R*.08,0,cx+R*.25,cy,R*1.05);
+    sh.addColorStop(0,'rgba(0,0,0,.82)');
+    sh.addColorStop(.48,'rgba(0,0,0,.3)');
     sh.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=sh; ctx.fillRect(cx-R-2,cy-R-2,R*2+4,R*2+4);
+    ctx.fillStyle=sh;ctx.fillRect(cx-R-1,cy-R-1,R*2+2,R*2+2);
     ctx.restore();
 
     // Atmosphere glow
-    const atm=ctx.createRadialGradient(cx,cy,R*.88,cx,cy,R*1.2);
-    atm.addColorStop(0,'rgba(201,168,76,.22)');
-    atm.addColorStop(.6,'rgba(180,120,40,.08)');
+    const atm=ctx.createRadialGradient(cx,cy,R*.87,cx,cy,R*1.22);
+    atm.addColorStop(0,'rgba(201,168,76,.2)');
+    atm.addColorStop(.5,'rgba(180,120,40,.07)');
     atm.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=atm; ctx.beginPath(); ctx.arc(cx,cy,R*1.2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=atm;ctx.beginPath();ctx.arc(cx,cy,R*1.22,0,Math.PI*2);ctx.fill();
 
-    // Rings in front (bottom half only)
-    ctx.save();
-    ctx.translate(cx,cy); ctx.scale(1,.28);
-    ctx.beginPath(); ctx.rect(-R*2.5,0,R*5,R*3); ctx.clip();
-    for(let i=3;i>=0;i--){
-      const inn=R*(1.28+i*.2), out=inn+R*.1;
-      const alpha=[.75,.6,.45,.28][i];
-      ctx.strokeStyle=`rgba(201,168,76,${alpha})`;
-      ctx.lineWidth=out-inn;
-      ctx.beginPath(); ctx.arc(0,0,(inn+out)/2,0,Math.PI*2); ctx.stroke();
-    }
-    ctx.restore();
+    // Rings IN FRONT of planet
+    drawRings(true);
 
-    ctx.restore();
-    rot+=.003;
+    rot+=.0025;
+    stormAngle+=storm.speed;
     requestAnimationFrame(draw);
   }
   draw();
 })();
 
-/* ══════════════════════════
-   LEVEL TICKER
-══════════════════════════ */
+/* ── Level ticker ── */
 (function(){
   const levels=['🪨 Asteroide','🌑 Proto-planeta','🌍 Terrestre','🌿 Mundo Verde','🌊 Oceânico','🌟 Gigante Gasoso','🧊 Gigante de Gelo','🌌 Nebulosa','☀️ Estrela Dev'];
   const wrap=document.getElementById('ticker-wrap');
-  wrap.innerHTML=levels.map((l,i)=>`<span class="ticker${i===4?' active':''}" id="tk${i}">${l}</span>`).join('');
-  let cur=4;
-  setInterval(()=>{
-    document.getElementById('tk'+cur)?.classList.remove('active');
-    cur=(cur+1)%levels.length;
-    document.getElementById('tk'+cur)?.classList.add('active');
-  },1800);
+  wrap.innerHTML=levels.map((l,i)=>`<span class="ticker${i===5?' active':''}" id="tk${i}">${l}</span>`).join('');
+  let cur=5;
+  setInterval(()=>{document.getElementById('tk'+cur)?.classList.remove('active');cur=(cur+1)%levels.length;document.getElementById('tk'+cur)?.classList.add('active');},1800);
 })();
 
-// Error
 const p=new URLSearchParams(location.search);
 if(p.get('error')){const e=document.getElementById('error-msg');e.textContent='Falha na autenticação. Tente novamente.';e.style.display='block';}
 </script>
